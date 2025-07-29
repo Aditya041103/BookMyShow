@@ -17,13 +17,12 @@ const MyBookings = () => {
 
   const getMyBookings = async () =>{
     try {
-      // const {data} = await axios.get('/api/user/bookings', {
-      //   headers: { Authorization: `Bearer ${await getToken()}` }
-      // })
-        // if (data.success) {
-        //   setBookings(data.bookings)
-        // }
-      setBookings(dummyBookingData)
+      const {data} = await axios.get('/api/user/bookings', {
+        headers: { Authorization: `Bearer ${await getToken()}` }
+      })
+        if (data.success) {
+          setBookings(data.bookings)
+        }
     } catch (error) {
       console.log(error)
     }

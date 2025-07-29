@@ -24,14 +24,10 @@ const SeatLayout = () => {
 
   const getShow = async () =>{
     try {
-      // const { data } = await axios.get(`/api/show/${id}`)
-      // if (data.success){
-      //   setShow(data)
-      // }
-      setShow({
-        movie: dummyShowsData.find(show => show._id === id),
-        dateTime: dummyDateTimeData
-    })
+      const { data } = await axios.get(`/api/show/${id}`)
+      if (data.success){
+        setShow(data)
+      }
     } catch (error) {
       console.log(error)
     }

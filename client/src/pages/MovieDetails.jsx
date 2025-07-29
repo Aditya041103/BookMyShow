@@ -19,14 +19,14 @@ const MovieDetails = () => {
   const {shows, axios, getToken, user, fetchFavoriteMovies, favoriteMovies, image_base_url} = useAppContext()
 
   const getShow = async ()=>{
-    // try {
-    //   const { data } = await axios.get(`/api/show/${id}`)
-    //   if(data.success){
-    //     setShow(data)
-    //   }
-    // } catch (error) {
-    //   console.log(error)
-    // }
+    try {
+      const { data } = await axios.get(`/api/show/${id}`)
+      if(data.success){
+        setShow(data)
+      }
+    } catch (error) {
+      console.log(error)
+    }
     try {
       const show=dummyShowsData.find(show=>show._id===id)
       setShow({
