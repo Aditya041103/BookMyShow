@@ -2,15 +2,15 @@ import axios from "axios"
 import Movie from "../models/Movie.js";
 import Show from "../models/Show.js";
 import { inngest } from "../inngest/index.js";
+import Playing from "../models/Playing.js";
+import Credit from "../models/Credit.js";
 
 // API to get now playing movies from TMDB API
 export const getNowPlayingMovies = async (req, res) => {
     try {
-        const { data } = await axios.get('https://api.themoviedb.org/3/movie/now_playing', {
-            headers: { Authorization: `Bearer ${process.env.TMDB_API_KEY}` }
-        })
-        console.log(data)
-        const movies = data.results;
+        const data = await Playing.find({}).sort({ createdAt: -1 }).limit(20);
+        console.log(data);
+        const movies = data;
         res.json({ success: true, movies: movies })
     } catch (error) {
         console.error(error);
@@ -28,17 +28,12 @@ export const addShow = async (req, res) => {
         if (!movie) {
             // Fetch movie details and credits from TMDB API
             const [movieDetailsResponse, movieCreditsResponse] = await Promise.all([
-                axios.get(`https://api.themoviedb.org/3/movie/${movieId}`, {
-                    headers: { Authorization: `Bearer ${process.env.TMDB_API_KEY}` }
-                }),
-
-                axios.get(`https://api.themoviedb.org/3/movie/${movieId}/credits`, {
-                    headers: { Authorization: `Bearer ${process.env.TMDB_API_KEY}` }
-                })
+                Playing.findOne({ id: movieId }),  // your "movies" collection
+                Credit.findOne({ id: movieId })   // your "credits" collection
             ]);
 
-            const movieApiData = movieDetailsResponse.data;
-            const movieCreditsData = movieCreditsResponse.data;
+            const movieApiData = movieDetailsResponse;
+            const movieCreditsData = movieCreditsResponse;
 
             const movieDetails = {
                 _id: movieId,

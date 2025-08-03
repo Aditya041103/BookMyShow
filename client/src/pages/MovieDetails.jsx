@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { dummyDateTimeData, dummyShowsData } from '../assets/assets'
 import BlurCircle from '../components/BlurCircle'
 import { Heart, PlayCircleIcon, StarIcon } from 'lucide-react'
 import timeFormat from '../lib/timeFormat'
@@ -8,7 +9,6 @@ import MovieCard from '../components/MovieCard'
 import Loading from '../components/Loading'
 import { useAppContext } from '../context/AppContext'
 import toast from 'react-hot-toast'
-import { dummyShowsData,dummyDateTimeData } from '../assets/assets'
 
 const MovieDetails = () => {
 
@@ -24,15 +24,6 @@ const MovieDetails = () => {
       if(data.success){
         setShow(data)
       }
-    } catch (error) {
-      console.log(error)
-    }
-    try {
-      const show=dummyShowsData.find(show=>show._id===id)
-      setShow({
-        movie:show,
-        dateTime:dummyDateTimeData
-      })
     } catch (error) {
       console.log(error)
     }
@@ -107,8 +98,8 @@ const MovieDetails = () => {
 
       <p className='text-lg font-medium mt-20 mb-8'>You May Also Like</p>
       <div className='flex flex-wrap max-sm:justify-center gap-8'>
-          {dummyShowsData.slice(0,4).map((movie, index)=> (
-            <MovieCard key={index} movie={movie} className="text-4xl"/>
+          {shows.slice(0,4).map((movie, index)=> (
+            <MovieCard key={index} movie={movie}/>
           ))}
       </div>
       <div className='flex justify-center mt-20'>
