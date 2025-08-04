@@ -16,21 +16,17 @@ export const assets = {
 
 export const dummyTrailers = [
     {
-        image: "https://img.youtube.com/vi/WpW36ldAqnM/maxresdefault.jpg",
-        videoUrl: 'https://www.youtube.com/watch?v=WpW36ldAqnM'
+        image: "https://c4.wallpaperflare.com/wallpaper/985/698/466/3-idiots-2009-aamir-khan-madhavan-sharman-joshi-wallpaper-preview.jpg",
+        videoUrl: 'https://www.youtube.com/watch?v=DKzBmRRdPXo'
     },
     {
-        image: "https://img.youtube.com/vi/-sAOWhvheK8/maxresdefault.jpg",
-        videoUrl: 'https://www.youtube.com/watch?v=-sAOWhvheK8'
+        image: "https://sm.mashable.com/mashable_in/seo/default/chhichhore-movie-review-strap-in-for-an-emotional-ride-about_98g1.jpg",
+        videoUrl: 'https://www.youtube.com/watch?v=t56jPOpGFts'
     },
     {
-        image: "https://img.youtube.com/vi/1pHDWnXmK7Y/maxresdefault.jpg",
-        videoUrl: 'https://www.youtube.com/watch?v=1pHDWnXmK7Y'
-    },
-    {
-        image: "https://img.youtube.com/vi/umiKiW4En9g/maxresdefault.jpg",
-        videoUrl: 'https://www.youtube.com/watch?v=umiKiW4En9g'
-    },
+        image: "https://img1.hscicdn.com/image/upload/f_auto,t_ds_w_1200,q_60/lsci/db/PICTURES/CMS/194400/194475.jpg",
+        videoUrl: 'https://www.youtube.com/watch?v=6L6XqWoS8tw'
+    }
 ]
 
 const dummyCastsData = [
