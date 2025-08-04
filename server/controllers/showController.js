@@ -124,3 +124,41 @@ export const getShow = async (req, res) => {
         res.json({ success: false, message: error.message });
     }
 }
+
+// API to get a show by TMDB ID for recommendations
+export const getShowByTmdbId = async (req, res) => {
+    try {
+        const { tmdbId } = req.params;
+
+        // Find the movie in Playing collection by TMDB ID
+        const playingMovie = await Playing.findOne({ id: parseInt(tmdbId) });
+        if (!playingMovie) {
+            return res.json({ success: false, message: "Movie not found in playing collection" });
+        }
+
+        // Check if there's a corresponding show for this movie
+        const movie = await Movie.findById(playingMovie.id);
+        if (movie) {
+            // If there's a show, return the full movie object
+            return res.json({ success: true, show: { movie } });
+        } else {
+            // If no show exists, create a minimal movie object from Playing data
+            const movieData = {
+                _id: playingMovie.id,
+                title: playingMovie.title,
+                overview: playingMovie.overview,
+                poster_path: playingMovie.poster_path,
+                backdrop_path: playingMovie.backdrop_path,
+                genres: playingMovie.genres,
+                release_date: playingMovie.release_date,
+                vote_average: playingMovie.vote_average,
+                runtime: playingMovie.runtime,
+                id: playingMovie.id
+            };
+            return res.json({ success: true, show: { movie: movieData } });
+        }
+    } catch (error) {
+        console.error(error);
+        res.json({ success: false, message: error.message });
+    }
+}
