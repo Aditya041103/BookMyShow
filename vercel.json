@@ -11,5 +11,14 @@
       "src": "/(.*)",
       "dest": "app.py"
     }
-  ]
+  ],
+  "functions": {
+    "app.py": {
+      "excludeFiles": [
+        "node_modules/**",
+        ".venv/**",
+        "requirements.txt"
+      ]
+    }
+  }
 }
