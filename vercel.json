@@ -14,7 +14,7 @@
   ],
   "functions": {
     "app.py": {
-      "excludeFiles": "{node_modules/**,.venv/**,requirements.txt}"
+      "excludeFiles": "node_modules/**,.venv/**,requirements.txt"
     }
   }
 }
