@@ -28,16 +28,8 @@ export const stripeWebhooks = async (request, response) => {
                 const booking = await Booking.findByIdAndUpdate(bookingId, {
                     isPaid: true,
                     paymentLink: ""
-                }, { new: true })
-                console.log(1)
-                if (booking) {
-                    const showData = await Show.findById(booking.show);
-                    booking.bookedSeats.forEach(seat => {
-                        showData.occupiedSeats[seat] = booking.user;
-                    });
-                    showData.markModified('occupiedSeats');
-                    await showData.save();
-                }
+                })
+                
                 // Send Confirmation Email
                 await inngest.send({
                     name: "app/show.booked",

@@ -45,13 +45,13 @@ export const createBooking = async (req, res) => {
             bookedSeats: selectedSeats
         })
 
-        // selectedSeats.map((seat) => {
-        //     showData.occupiedSeats[seat] = userId;
-        // })
+        selectedSeats.map((seat) => {
+            showData.occupiedSeats[seat] = userId;
+        })
 
-        // showData.markModified('occupiedSeats');
+        showData.markModified('occupiedSeats');
 
-        // await showData.save();
+        await showData.save();
 
         // Stripe Gateway Initialize
         const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY)
