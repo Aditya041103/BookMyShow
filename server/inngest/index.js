@@ -10,10 +10,10 @@ export const inngest = new Inngest({ id: "movie-ticket-booking" });
 
 // Inngest Function to save user data to a database
 const syncUserCreation = inngest.createFunction(
-    {id: 'sync-user-from-clerk'},
+    { id: 'sync-user-from-clerk' },
     { event: 'clerk/user.created' },
-    async ({ event })=>{
-        const {id, first_name, last_name, email_addresses, image_url} = event.data
+    async ({ event }) => {
+        const { id, first_name, last_name, email_addresses, image_url } = event.data
         const userData = {
             _id: id,
             email: email_addresses[0].email_address,
@@ -26,20 +26,20 @@ const syncUserCreation = inngest.createFunction(
 
 // Inngest Function to delete user from database
 const syncUserDeletion = inngest.createFunction(
-    {id: 'delete-user-with-clerk'},
+    { id: 'delete-user-with-clerk' },
     { event: 'clerk/user.deleted' },
-    async ({ event })=>{
-        
-       const {id} = event.data
-       await User.findByIdAndDelete(id)
+    async ({ event }) => {
+
+        const { id } = event.data
+        await User.findByIdAndDelete(id)
     }
 )
 
 // Inngest Function to update user data in database 
 const syncUserUpdation = inngest.createFunction(
-    {id: 'update-user-from-clerk'},
+    { id: 'update-user-from-clerk' },
     { event: 'clerk/user.updated' },
-    async ({ event })=>{
+    async ({ event }) => {
         const { id, first_name, last_name, email_addresses, image_url } = event.data
         const userData = {
             _id: id,
@@ -53,20 +53,20 @@ const syncUserUpdation = inngest.createFunction(
 
 // Inngest Function to cancel booking and release seats of show after 10 minutes of booking created if payment is not made
 const releaseSeatsAndDeleteBooking = inngest.createFunction(
-    {id: 'release-seats-delete-booking'},
-    {event: "app/checkpayment"},
-    async ({ event, step })=>{
+    { id: 'release-seats-delete-booking' },
+    { event: "app/checkpayment" },
+    async ({ event, step }) => {
         const tenMinutesLater = new Date(Date.now() + 10 * 60 * 1000);
         await step.sleepUntil('wait-for-10-minutes', tenMinutesLater);
 
-        await step.run('check-payment-status', async ()=>{
+        await step.run('check-payment-status', async () => {
             const bookingId = event.data.bookingId;
             const booking = await Booking.findById(bookingId)
 
             // If payment is not made, release seats and delete booking
-            if(!booking.isPaid){
+            if (!booking.isPaid) {
                 const show = await Show.findById(booking.show);
-                booking.bookedSeats.forEach((seat)=>{
+                booking.bookedSeats.forEach((seat) => {
                     delete show.occupiedSeats[seat]
                 });
                 show.markModified('occupiedSeats')
@@ -79,14 +79,14 @@ const releaseSeatsAndDeleteBooking = inngest.createFunction(
 
 // Inngest Function to send email when user books a show
 const sendBookingConfirmationEmail = inngest.createFunction(
-    {id: "send-booking-confirmation-email"},
-    {event: "app/show.booked"},
-    async ({ event, step })=>{
+    { id: "send-booking-confirmation-email" },
+    { event: "app/show.booked" },
+    async ({ event, step }) => {
         const { bookingId } = event.data;
 
         const booking = await Booking.findById(bookingId).populate({
             path: 'show',
-            populate: {path: "movie", model: "Movie"}
+            populate: { path: "movie", model: "Movie" }
         }).populate('user');
 
         await sendEmail({
@@ -100,7 +100,7 @@ const sendBookingConfirmationEmail = inngest.createFunction(
                             <strong>Time:</strong> ${new Date(booking.show.showDateTime).toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata' })}
                         </p>
                         <p>Enjoy the show! 🍿</p>
-                        <p>Thanks for booking with us!<br/>— QuickShow Team</p>
+                        <p>Thanks for booking with us!<br/>— BookShow Team</p>
                     </div>`
         })
     }
@@ -109,30 +109,30 @@ const sendBookingConfirmationEmail = inngest.createFunction(
 
 // Inngest Function to send reminders
 const sendShowReminders = inngest.createFunction(
-    {id: "send-show-reminders"},
+    { id: "send-show-reminders" },
     { cron: "0 */8 * * *" }, // Every 8 hours
-    async ({ step })=>{
+    async ({ step }) => {
         const now = new Date();
         const in8Hours = new Date(now.getTime() + 8 * 60 * 60 * 1000);
         const windowStart = new Date(in8Hours.getTime() - 10 * 60 * 1000);
 
         // Prepare reminder tasks
-        const reminderTasks =  await step.run("prepare-reminder-tasks", async ()=>{
+        const reminderTasks = await step.run("prepare-reminder-tasks", async () => {
             const shows = await Show.find({
                 showTime: { $gte: windowStart, $lte: in8Hours },
             }).populate('movie');
 
             const tasks = [];
 
-            for(const show of shows){
-                if(!show.movie || !show.occupiedSeats) continue;
+            for (const show of shows) {
+                if (!show.movie || !show.occupiedSeats) continue;
 
                 const userIds = [...new Set(Object.values(show.occupiedSeats))];
-                if(userIds.length === 0) continue;
+                if (userIds.length === 0) continue;
 
-                const users = await User.find({_id: {$in: userIds}}).select("name email");
+                const users = await User.find({ _id: { $in: userIds } }).select("name email");
 
-                for(const user of users){
+                for (const user of users) {
                     tasks.push({
                         userEmail: user.email,
                         userName: user.name,
@@ -144,17 +144,17 @@ const sendShowReminders = inngest.createFunction(
             return tasks;
         })
 
-        if(reminderTasks.length === 0){
-            return {sent: 0, message: "No reminders to send."}
+        if (reminderTasks.length === 0) {
+            return { sent: 0, message: "No reminders to send." }
         }
 
-         // Send reminder emails
-         const results = await step.run('send-all-reminders', async ()=>{
+        // Send reminder emails
+        const results = await step.run('send-all-reminders', async () => {
             return await Promise.allSettled(
                 reminderTasks.map(task => sendEmail({
                     to: task.userEmail,
                     subject: `Reminder: Your movie "${task.movieTitle}" starts soon!`,
-                     body: `<div style="font-family: Arial, sans-serif; padding: 20px;">
+                    body: `<div style="font-family: Arial, sans-serif; padding: 20px;">
                             <h2>Hello ${task.userName},</h2>
                             <p>This is a quick reminder that your movie:</p>
                             <h3 style="color: #F84565;">"${task.movieTitle}"</h3>
@@ -164,33 +164,33 @@ const sendShowReminders = inngest.createFunction(
                             </p>
                             <p>It starts in approximately <strong>8 hours</strong> - make sure you're ready!</p>
                             <br/>
-                            <p>Enjoy the show!<br/>QuickShow Team</p>
+                            <p>Enjoy the show!<br/>BookShow Team</p>
                         </div>`
                 }))
             )
-         })
+        })
 
-         const sent = results.filter(r => r.status === "fulfilled").length;
-         const failed = results.length - sent;
+        const sent = results.filter(r => r.status === "fulfilled").length;
+        const failed = results.length - sent;
 
-         return {
+        return {
             sent,
             failed,
             message: `Sent ${sent} reminder(s), ${failed} failed.`
-         }
+        }
     }
 )
 
 // Inngest Function to send notifications when a new show is added
 const sendNewShowNotifications = inngest.createFunction(
-    {id: "send-new-show-notifications"},
+    { id: "send-new-show-notifications" },
     { event: "app/show.added" },
-    async ({ event })=>{
+    async ({ event }) => {
         const { movieTitle } = event.data;
 
-        const users =  await User.find({})
+        const users = await User.find({})
 
-        for(const user of users){
+        for (const user of users) {
             const userEmail = user.email;
             const userName = user.name;
 
@@ -201,18 +201,18 @@ const sendNewShowNotifications = inngest.createFunction(
                     <h3 style="color: #F84565;">"${movieTitle}"</h3>
                     <p>Visit our website</p>
                     <br/>
-                    <p>Thanks,<br/>QuickShow Team</p>
+                    <p>Thanks,<br/>BookShow Team</p>
                 </div>`;
 
-                await sendEmail({
-                    to: userEmail,
-                    subject,
-                    body,
-                })
+            await sendEmail({
+                to: userEmail,
+                subject,
+                body,
+            })
         }
 
-        return {message: "Notifications sent." }
-        
+        return { message: "Notifications sent." }
+
     }
 )
 
