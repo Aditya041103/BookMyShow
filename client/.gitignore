@@ -23,5 +23,5 @@ requirements.txt
 *.njsproj
 *.sln
 *.sw?
-
+.env
 .vercel

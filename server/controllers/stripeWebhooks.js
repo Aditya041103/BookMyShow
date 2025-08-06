@@ -28,7 +28,7 @@ export const stripeWebhooks = async (request, response) => {
                 const booking = await Booking.findByIdAndUpdate(bookingId, {
                     isPaid: true,
                     paymentLink: ""
-                })
+                },{ new: true })
                 
                 // Send Confirmation Email
                 await inngest.send({
