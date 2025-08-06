@@ -8,7 +8,7 @@ import Credit from "../models/Credit.js";
 // API to get now playing movies from TMDB API
 export const getNowPlayingMovies = async (req, res) => {
     try {
-        const data = await Playing.find({}).sort({ createdAt: -1 }).limit(20);
+        const data = await Playing.find({}).sort({ createdAt: -1 });
         console.log(data);
         const movies = data;
         res.json({ success: true, movies: movies })

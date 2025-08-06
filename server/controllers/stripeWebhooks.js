@@ -2,7 +2,7 @@ import stripe from "stripe";
 import Booking from '../models/Booking.js'
 import { inngest } from "../inngest/index.js";
 
-export const stripeWebhooks = async (request, response)=>{
+export const stripeWebhooks = async (request, response) => {
     const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY);
     const sig = request.headers["stripe-signature"];
 
@@ -25,24 +25,32 @@ export const stripeWebhooks = async (request, response)=>{
                 const session = sessionList.data[0];
                 const { bookingId } = session.metadata;
 
-                await Booking.findByIdAndUpdate(bookingId, {
+                const booking = await Booking.findByIdAndUpdate(bookingId, {
                     isPaid: true,
                     paymentLink: ""
+                }, { new: true })
+                console.log(1)
+                if (booking) {
+                    const showData = await Show.findById(booking.show);
+                    booking.bookedSeats.forEach(seat => {
+                        showData.occupiedSeats[seat] = booking.user;
+                    });
+                    showData.markModified('occupiedSeats');
+                    await showData.save();
+                }
+                // Send Confirmation Email
+                await inngest.send({
+                    name: "app/show.booked",
+                    data: { bookingId }
                 })
 
-                 // Send Confirmation Email
-                 await inngest.send({
-                    name: "app/show.booked",
-                    data: {bookingId}
-                 })
-                
                 break;
             }
-        
+
             default:
                 console.log('Unhandled event type:', event.type)
         }
-        response.json({received: true})
+        response.json({ received: true })
     } catch (err) {
         console.error("Webhook processing error:", err);
         response.status(500).send("Internal Server Error");

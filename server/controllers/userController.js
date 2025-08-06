@@ -8,7 +8,7 @@ export const getUserBookings = async (req, res)=>{
     try {
         const user = req.auth().userId;
 
-        const bookings = await Booking.find({user}).populate({
+        const bookings = await Booking.find({user,isPaid:true}).populate({
             path: "show",
             populate: {path: "movie"}
         }).sort({createdAt: -1 })
